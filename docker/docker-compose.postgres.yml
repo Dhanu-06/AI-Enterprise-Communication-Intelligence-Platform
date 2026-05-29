@@ -1,0 +1,39 @@
+# PostgreSQL-only stack for local database development.
+# Usage: docker compose -f docker/docker-compose.postgres.yml up -d
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: comm_intel_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-comm_intel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-comm_intel_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-comm_intel_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-comm_intel} -d ${POSTGRES_DB:-comm_intel_db}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - comm_intel_network
+
+volumes:
+  postgres_data:
+    name: comm_intel_postgres_data
+
+networks:
+  comm_intel_network:
+    name: comm_intel_network
+    driver: bridge
