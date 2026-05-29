@@ -24,7 +24,8 @@ async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle hooks."""
     upload_path = Path(settings.upload_dir)
     upload_path.mkdir(parents=True, exist_ok=True)
-    Path(settings.chroma_persist_dir).mkdir(parents=True, exist_ok=True)
+    if settings.chroma_mode == "persistent":
+        Path(settings.chroma_persist_dir).mkdir(parents=True, exist_ok=True)
     logger.info("Upload directory ready: %s", upload_path.resolve())
 
     if settings.debug:

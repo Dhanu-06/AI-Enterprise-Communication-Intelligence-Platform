@@ -45,3 +45,37 @@ class SearchResponse(BaseModel):
     query: str
     total: int
     results: list[SearchHit]
+
+
+class ElasticsearchHealthResponse(BaseModel):
+    """Elasticsearch cluster health snapshot."""
+
+    status: str
+    index: str
+    cluster_name: str | None = None
+    cluster_status: str | None = None
+    number_of_nodes: int | None = None
+    document_count: int | None = None
+    error: str | None = None
+
+
+class ReindexResponse(BaseModel):
+    """Result of a full Elasticsearch reindex operation."""
+
+    index: str
+    indexed: int
+    message: str
+
+
+class ChromaHealthResponse(BaseModel):
+    """ChromaDB collection health snapshot."""
+
+    status: str
+    collection: str
+    mode: str
+    document_count: int | None = None
+    embedding_model: str | None = None
+    persist_dir: str | None = None
+    host: str | None = None
+    port: int | None = None
+    error: str | None = None

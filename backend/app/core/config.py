@@ -42,15 +42,24 @@ class Settings(BaseSettings):
     # Elasticsearch
     elasticsearch_url: str = "http://localhost:9200"
     elasticsearch_index: str = "emails"
+    elasticsearch_index_template: str = "comm_intel_emails_template"
+    elasticsearch_enabled: bool = True
+    elasticsearch_timeout: int = 30
+    elasticsearch_max_retries: int = 3
+    elasticsearch_username: str | None = None
+    elasticsearch_password: str | None = None
 
     # ChromaDB
     chroma_host: str = "localhost"
     chroma_port: int = 8001
     chroma_collection: str = "email_embeddings"
     chroma_persist_dir: str = "chroma_data"
+    chroma_mode: str = "http"  # http (recommended) | persistent
+    chroma_enabled: bool = True
 
     # AI / Embeddings
     embedding_model: str = "all-MiniLM-L6-v2"
+    embedding_batch_size: int = 64
     summary_model: str = "google/flan-t5-base"
 
     # File uploads

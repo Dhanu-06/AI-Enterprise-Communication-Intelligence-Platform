@@ -1,0 +1,38 @@
+# ChromaDB server stack for semantic search development.
+# Usage: docker compose -f docker/docker-compose.chroma.yml up -d
+
+services:
+  chromadb:
+    image: chromadb/chroma:0.5.23
+    container_name: comm_intel_chromadb
+    restart: unless-stopped
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+      CHROMA_SERVER_HOST: ${CHROMA_SERVER_HOST:-0.0.0.0}
+      CHROMA_SERVER_HTTP_PORT: ${CHROMA_SERVER_HTTP_PORT:-8000}
+    ports:
+      - "${CHROMA_PORT:-8001}:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat')\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - comm_intel_network
+
+volumes:
+  chroma_data:
+    name: comm_intel_chroma_data
+
+networks:
+  comm_intel_network:
+    name: comm_intel_network
+    external: true

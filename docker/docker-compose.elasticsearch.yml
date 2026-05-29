@@ -1,0 +1,46 @@
+# Elasticsearch-only stack for local search development.
+# Usage: docker compose -f docker/docker-compose.elasticsearch.yml up -d
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    container_name: comm_intel_elasticsearch
+    restart: unless-stopped
+    environment:
+      node.name: comm_intel_es01
+      cluster.name: comm-intel-cluster
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.http.ssl.enabled: "false"
+      ES_JAVA_OPTS: -Xms${ELASTICSEARCH_HEAP_SIZE:-512m} -Xmx${ELASTICSEARCH_HEAP_SIZE:-512m}
+      bootstrap.memory_lock: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      - "${ELASTICSEARCH_TRANSPORT_PORT:-9300}:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s || exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+    networks:
+      - comm_intel_network
+
+volumes:
+  elasticsearch_data:
+    name: comm_intel_elasticsearch_data
+
+networks:
+  comm_intel_network:
+    name: comm_intel_network
+    external: true

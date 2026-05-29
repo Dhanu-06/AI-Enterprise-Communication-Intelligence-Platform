@@ -175,6 +175,13 @@ class EmailRepository:
         )
         return list(result.scalars().all())
 
+    async def list_all(self) -> list[Email]:
+        """Return all emails (used for bulk reindex operations)."""
+        result = await self.session.execute(
+            select(Email).order_by(Email.created_at.asc())
+        )
+        return list(result.scalars().all())
+
     async def get_with_thread(self, email_id: uuid.UUID) -> tuple[Email | None, EmailThread | None]:
         result = await self.session.execute(
             select(Email)

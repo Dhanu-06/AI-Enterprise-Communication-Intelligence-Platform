@@ -1,0 +1,43 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "email_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": ["lowercase", "asciifolding", "porter_stem"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "email_id": { "type": "keyword" },
+      "archive_id": { "type": "keyword" },
+      "thread_id": { "type": "keyword" },
+      "sender": {
+        "type": "keyword",
+        "fields": {
+          "text": { "type": "text", "analyzer": "email_analyzer" }
+        }
+      },
+      "receivers": { "type": "keyword" },
+      "cc": { "type": "keyword" },
+      "subject": {
+        "type": "text",
+        "analyzer": "email_analyzer",
+        "fields": {
+          "keyword": { "type": "keyword", "ignore_above": 1024 }
+        }
+      },
+      "body_text": { "type": "text", "analyzer": "email_analyzer" },
+      "summary": { "type": "text", "analyzer": "email_analyzer" },
+      "sent_at": { "type": "date" },
+      "created_at": { "type": "date" },
+      "source_file": { "type": "keyword" }
+    }
+  }
+}

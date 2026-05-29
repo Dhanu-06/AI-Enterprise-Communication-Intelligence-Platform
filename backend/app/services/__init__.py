@@ -3,6 +3,7 @@
 from app.services.analytics_service import AnalyticsService
 from app.services.chroma_service import ChromaService
 from app.services.elasticsearch_service import ElasticsearchService
+from app.services.embedding_service import EmbeddingService
 from app.services.email_parser import EmailParserService
 from app.services.ingestion_service import IngestionService
 from app.services.similarity_service import SimilarityService
@@ -14,6 +15,7 @@ __all__ = [
     "AnalyticsService",
     "ChromaService",
     "ElasticsearchService",
+    "EmbeddingService",
     "EmailParserService",
     "IngestionService",
     "SimilarityService",
