@@ -3,8 +3,13 @@
 from functools import lru_cache
 from typing import List
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _parse_cors_origins(value: str) -> List[str]:
+    """Parse comma-separated CORS origins from environment variables."""
+    return [origin.strip() for origin in value.split(",") if origin.strip()]
 
 
 class Settings(BaseSettings):
@@ -27,9 +32,10 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # CORS
-    cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://127.0.0.1:3000"]
+    # Stored as comma-separated string in .env (avoids pydantic-settings JSON list parsing)
+    cors_origins_env: str = Field(
+        default="http://localhost:3000,http://127.0.0.1:3000",
+        validation_alias="CORS_ORIGINS",
     )
 
     # PostgreSQL
@@ -66,13 +72,9 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     max_upload_size_mb: int = 500
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, value: object) -> List[str]:
-        """Allow comma-separated CORS origins in .env files."""
-        if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
-        return value  # type: ignore[return-value]
+    @property
+    def cors_origins(self) -> List[str]:
+        return _parse_cors_origins(self.cors_origins_env)
 
     @property
     def database_url(self) -> str:

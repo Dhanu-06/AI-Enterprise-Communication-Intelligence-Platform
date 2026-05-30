@@ -31,7 +31,11 @@ class EmailArchive(Base):
     filename: Mapped[str] = mapped_column(String(512), nullable=False)
     file_path: Mapped[str] = mapped_column(String(1024), nullable=False)
     status: Mapped[ArchiveStatus] = mapped_column(
-        Enum(ArchiveStatus, name="archive_status"),
+        Enum(
+            ArchiveStatus,
+            name="archive_status",
+            values_callable=lambda statuses: [s.value for s in statuses],
+        ),
         default=ArchiveStatus.PENDING,
         nullable=False,
         index=True,

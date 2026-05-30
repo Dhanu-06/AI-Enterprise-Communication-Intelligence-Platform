@@ -10,21 +10,44 @@ import type {
   Thread,
 } from "./types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    return "/api/v1";
+  }
+  return (
+    process.env.INTERNAL_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:8000/api/v1"
+  );
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...options?.headers,
-    },
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${getApiBase()}${path}`, {
+      ...options,
+      headers: {
+        ...(options?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...options?.headers,
+      },
+      cache: "no-store",
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the API. Ensure Docker is running (docker compose up) and open http://localhost:3000."
+    );
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || `Request failed: ${response.status}`);
+    let detail = errorText || `Request failed: ${response.status}`;
+    try {
+      const parsed = JSON.parse(errorText) as { detail?: string };
+      if (parsed.detail) detail = parsed.detail;
+    } catch {
+      /* use raw text */
+    }
+    throw new Error(detail);
   }
 
   return response.json() as Promise<T>;

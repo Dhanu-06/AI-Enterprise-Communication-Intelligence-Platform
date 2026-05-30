@@ -95,8 +95,22 @@ class IngestionService:
                 await thread_service.rebuild_threads_for_archive(archive.id)
 
                 refreshed_emails = await email_repo.list_by_archive(archive.id)
-                await self.elasticsearch_service.bulk_index_emails(refreshed_emails)
-                self.chroma_service.bulk_index_emails(refreshed_emails)
+
+                if settings.elasticsearch_enabled:
+                    try:
+                        if not self.elasticsearch_service.is_connected:
+                            await self.elasticsearch_service.connect()
+                        await self.elasticsearch_service.bulk_index_emails(refreshed_emails)
+                    except Exception as exc:
+                        logger.warning("Elasticsearch indexing skipped: %s", exc)
+
+                if settings.chroma_enabled:
+                    try:
+                        if not self.chroma_service.is_connected:
+                            self.chroma_service.connect()
+                        self.chroma_service.bulk_index_emails(refreshed_emails)
+                    except Exception as exc:
+                        logger.warning("ChromaDB indexing skipped: %s", exc)
 
                 for email in refreshed_emails:
                     await email_repo.update_index_ids(
