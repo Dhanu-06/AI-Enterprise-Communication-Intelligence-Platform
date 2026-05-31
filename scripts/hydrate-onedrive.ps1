@@ -2,7 +2,8 @@
 # OneDrive reparse points cause: "failed to read dockerfile: invalid file request Dockerfile"
 
 param(
-    [string[]]$Paths = @("backend", "frontend", "docker")
+    [string[]]$Paths = @("backend", "frontend", "docker"),
+    [string[]]$RootFiles = @("docker-compose.yml", ".env.example")
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +27,17 @@ function Restore-LocalFile {
 }
 
 $fixed = 0
+
+foreach ($rel in $RootFiles) {
+    $filePath = Join-Path $ProjectRoot $rel
+    if (-not (Test-Path -LiteralPath $filePath)) { continue }
+    $file = Get-Item -LiteralPath $filePath -Force
+    if ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        Restore-LocalFile -File $file
+        $fixed++
+    }
+}
+
 foreach ($rel in $Paths) {
     $root = Join-Path $ProjectRoot $rel
     if (-not (Test-Path -LiteralPath $root)) { continue }

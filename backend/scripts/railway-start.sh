@@ -31,7 +31,7 @@ def connection_params() -> dict:
         return params
 
     return {
-        "host": os.environ.get("POSTGRES_HOST") or os.environ.get("PGHOST", "postgres"),
+        "host": os.environ.get("POSTGRES_HOST") or os.environ.get("PGHOST", "localhost"),
         "port": int(os.environ.get("POSTGRES_PORT") or os.environ.get("PGPORT", "5432")),
         "user": os.environ["POSTGRES_USER"],
         "password": os.environ["POSTGRES_PASSWORD"],
@@ -68,12 +68,5 @@ echo "==> Running Alembic migrations..."
 alembic upgrade head
 
 PORT="${PORT:-8000}"
-echo "==> Starting application on 0.0.0.0:${PORT}: $*"
-if [ "$#" -gt 0 ]; then
-  if [ "$1" = "uvicorn" ]; then
-    set -- uvicorn app.main:app --host 0.0.0.0 --port "${PORT}"
-  fi
-  exec "$@"
-fi
-
+echo "==> Starting uvicorn on 0.0.0.0:${PORT}..."
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT}"

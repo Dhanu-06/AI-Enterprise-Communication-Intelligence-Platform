@@ -10,15 +10,23 @@ import type {
   Thread,
 } from "./types";
 
+function normalizeApiBase(raw: string): string {
+  const trimmed = raw.replace(/\/$/, "");
+  return trimmed.endsWith("/api/v1") ? trimmed : `${trimmed}/api/v1`;
+}
+
 function getApiBase(): string {
   if (typeof window !== "undefined") {
     return "/api/v1";
   }
-  return (
+
+  const serverBase =
     process.env.INTERNAL_API_URL ||
+    process.env.BACKEND_INTERNAL_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:8000/api/v1"
-  );
+    "http://localhost:8000/api/v1";
+
+  return normalizeApiBase(serverBase);
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -34,7 +42,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     });
   } catch {
     throw new Error(
-      "Cannot reach the API. Ensure Docker is running (docker compose up) and open http://localhost:3000."
+      "Cannot reach the API. Check that the backend is running and NEXT_PUBLIC_API_URL / rewrites are configured."
     );
   }
 

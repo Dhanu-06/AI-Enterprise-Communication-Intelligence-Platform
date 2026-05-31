@@ -18,16 +18,16 @@ email-validator==2.2.0
 elasticsearch==8.17.0
 chromadb==0.5.23
 
-# AI / NLP
+# AI / NLP — CPU-only PyTorch for smaller production images
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.5.1+cpu
+transformers==4.44.2
+sentence-transformers==3.3.1
 langchain==0.3.13
 langchain-community==0.3.13
-sentence-transformers==3.3.1
-transformers==4.44.2
-torch==2.5.1
 
 # Email parsing
 mail-parser==3.15.0
-python-magic==0.4.27
 
 # Utilities
 python-dotenv==1.0.1
