@@ -10,6 +10,8 @@ if (-not (Test-Path ".env")) {
     Write-Host "Created .env from .env.example"
 }
 
+& (Join-Path $PSScriptRoot "hydrate-onedrive.ps1")
+
 Write-Host "Building and starting all services (first run may take 10-15 minutes)..."
 docker compose up -d --build
 
